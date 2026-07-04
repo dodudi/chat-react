@@ -73,3 +73,19 @@ import clsx from 'clsx'
 // ✅ 올바른 예 — 레이아웃 → 색상 → 반응형/상태 순
 <button className="flex items-center rounded-md bg-blue-500 px-3 py-2 text-white hover:bg-blue-600 md:px-4">
 ```
+
+---
+
+## 다크모드는 `dark:` variant + class 전략을 쓴다
+
+OS 설정이 아닌 사용자가 직접 토글하는 다크모드이므로, `index.css`에 `@custom-variant dark (&:where(.dark, .dark *));`를 선언해 `prefers-color-scheme` 미디어쿼리가 아닌 `<html>`의 `.dark` 클래스 기준으로 동작하게 한다. 클래스 토글·저장 로직은 `shared/hooks/useTheme.ts` 하나로 캡슐화하고, 여러 곳에서 각자 `localStorage`를 다루지 않는다.
+
+색상 클래스는 항상 라이트 값 다음에 `dark:` 값을 짝으로 작성한다.
+
+```tsx
+// ✅ 올바른 예
+<div className="border-slate-200 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+
+// ❌ 잘못된 예 — 다크모드 값 누락
+<div className="border-slate-200 bg-white text-slate-800">
+```
