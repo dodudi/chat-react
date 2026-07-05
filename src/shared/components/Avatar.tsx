@@ -1,8 +1,8 @@
 import clsx from 'clsx'
-import type { User, UserStatus } from '../../features/user/types'
+import type { DisplayUser, UserStatus } from '../../features/user/types'
 
 type AvatarProps = {
-  user: User
+  user: DisplayUser
   size?: 'sm' | 'md' | 'lg'
   showStatus?: boolean
 }
@@ -21,7 +21,7 @@ const STATUS_DOT_CLASSES: Record<UserStatus, string> = {
 }
 
 export function Avatar({ user, size = 'md', showStatus = true }: AvatarProps) {
-  const initial = user.username.charAt(0).toUpperCase()
+  const initial = user.displayName.charAt(0).toUpperCase()
 
   return (
     <div className="relative shrink-0">

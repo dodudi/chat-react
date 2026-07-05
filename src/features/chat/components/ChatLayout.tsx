@@ -1,153 +1,163 @@
-import { useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
+import type { DisplayUser } from '../../user/types'
 import type { Server } from '../../server/types'
 import type { Channel } from '../../channel/types'
-import type { User } from '../../user/types'
-import type { Message } from '../types'
+import { useCurrentUser } from '../../../app/providers/CurrentUserProvider'
+import { useMyServers } from '../../server/hooks/useMyServers'
+import { useChannels } from '../../channel/hooks/useChannels'
+import { useServerMembers } from '../../server/hooks/useServerMembers'
+import { useMessages } from '../hooks/useMessages'
 import { ChannelSidebar } from '../../channel/components/ChannelSidebar'
+import { CreateChannelForm } from '../../channel/components/CreateChannelForm'
 import { MemberList } from '../../server/components/MemberList'
+import { CreateOrJoinServerPanel } from '../../server/components/CreateOrJoinServerPanel'
 import { AppHeader } from './AppHeader'
 import { MessageList } from './MessageList'
 import { MessageInput } from './MessageInput'
 
-const CURRENT_USER: User = { id: 'u1', username: 'rudy', status: 'ONLINE' }
-
-const MOCK_USERS: User[] = [
-  CURRENT_USER,
-  { id: 'u2', username: '지수', status: 'ONLINE' },
-  { id: 'u3', username: '민준', status: 'IDLE' },
-  { id: 'u4', username: '서연', status: 'DND' },
-  { id: 'u5', username: '도윤', status: 'OFFLINE' },
-  { id: 'u6', username: '하은', status: 'OFFLINE' },
-]
-
-const MOCK_SERVERS: Server[] = [
-  { id: 's1', name: 'chat-react' },
-  { id: 's2', name: '스터디 모임' },
-  { id: 's3', name: '게임 친구들' },
-]
-
-const MOCK_CHANNELS_BY_SERVER: Record<string, Channel[]> = {
-  s1: [
-    { id: 'c1', serverId: 's1', name: '공지사항', type: 'TEXT' },
-    { id: 'c2', serverId: 's1', name: '잡담', type: 'TEXT' },
-    { id: 'c3', serverId: 's1', name: '개발-프론트엔드', type: 'TEXT' },
-  ],
-  s2: [
-    { id: 'c4', serverId: 's2', name: '공지', type: 'TEXT' },
-    { id: 'c5', serverId: 's2', name: '질문답변', type: 'TEXT' },
-  ],
-  s3: [{ id: 'c6', serverId: 's3', name: '일반', type: 'TEXT' }],
-}
-
-const MOCK_MESSAGES_BY_CHANNEL: Record<string, Message[]> = {
-  c1: [
-    {
-      id: 'm1',
-      channelId: 'c1',
-      author: MOCK_USERS[1],
-      content: '이번 주 배포는 금요일 오후로 예정되어 있어요.',
-      createdAt: '2026-07-02T09:00:00',
-    },
-  ],
-  c2: [
-    {
-      id: 'm2',
-      channelId: 'c2',
-      author: MOCK_USERS[2],
-      content: '다들 점심 뭐 드셨어요?',
-      createdAt: '2026-07-02T12:01:00',
-    },
-    {
-      id: 'm3',
-      channelId: 'c2',
-      author: MOCK_USERS[2],
-      content: '저는 김치찌개 먹었습니다 ㅎㅎ',
-      createdAt: '2026-07-02T12:01:30',
-    },
-    {
-      id: 'm4',
-      channelId: 'c2',
-      author: MOCK_USERS[3],
-      content: '오 맛있겠다',
-      createdAt: '2026-07-02T12:02:10',
-    },
-  ],
-  c3: [
-    {
-      id: 'm5',
-      channelId: 'c3',
-      author: CURRENT_USER,
-      content: 'Tailwind 세팅 끝났고 STOMP 클라이언트 붙이는 중입니다.',
-      createdAt: '2026-07-02T14:30:00',
-    },
-  ],
+function CenteredNotice({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex flex-1 items-center justify-center px-4">
+      <p className="text-sm text-slate-500 dark:text-slate-400">{children}</p>
+    </div>
+  )
 }
 
 export function ChatLayout() {
-  const [activeServerId, setActiveServerId] = useState(MOCK_SERVERS[0].id)
-  const [activeChannelId, setActiveChannelId] = useState(MOCK_CHANNELS_BY_SERVER[MOCK_SERVERS[0].id][0].id)
+  const { currentUser, isLoading: isCurrentUserLoading } = useCurrentUser()
+  const { servers, isLoading: isServersLoading, refresh: refreshServers } = useMyServers()
+  const [activeServerId, setActiveServerId] = useState<number | null>(null)
+  const [activeChannelId, setActiveChannelId] = useState<number | null>(null)
   const [isMemberListOpen, setIsMemberListOpen] = useState(true)
   const [isChannelDrawerOpen, setIsChannelDrawerOpen] = useState(false)
-  const [messagesByChannel, setMessagesByChannel] = useState(MOCK_MESSAGES_BY_CHANNEL)
 
-  const activeServer = MOCK_SERVERS.find((server) => server.id === activeServerId) ?? MOCK_SERVERS[0]
-  const channels = MOCK_CHANNELS_BY_SERVER[activeServerId] ?? []
-  const activeChannel = channels.find((channel) => channel.id === activeChannelId) ?? channels[0]
-  const messages = messagesByChannel[activeChannel.id] ?? []
+  useEffect(() => {
+    if (servers.length === 0) return
+    if (servers.some((server) => server.id === activeServerId)) return
+    setActiveServerId(servers[0].id)
+  }, [servers, activeServerId])
 
-  function handleSelectServer(serverId: string) {
-    setActiveServerId(serverId)
-    setActiveChannelId(MOCK_CHANNELS_BY_SERVER[serverId][0].id)
+  const { channels, isLoading: isChannelsLoading, refresh: refreshChannels } = useChannels(activeServerId ?? -1)
+  const { members } = useServerMembers(activeServerId ?? -1)
+  const { messages, send: sendMessage } = useMessages(activeChannelId ?? -1, members)
+
+  useEffect(() => {
+    if (channels.length === 0) return
+    if (channels.some((channel) => channel.id === activeChannelId)) return
+    setActiveChannelId(channels[0].id)
+  }, [channels, activeChannelId])
+
+  const activeServer = servers.find((server) => server.id === activeServerId)
+  const activeChannel = channels.find((channel) => channel.id === activeChannelId)
+
+  if (isCurrentUserLoading || !currentUser) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-white dark:bg-slate-900">
+        <p className="text-sm text-slate-500 dark:text-slate-400">불러오는 중...</p>
+      </div>
+    )
   }
 
-  function handleSelectChannel(channelId: string) {
+  // 서버 멤버 닉네임 연동 전까지는 표시 이름으로 externalId를 임시로 사용
+  const displayCurrentUser: DisplayUser = { ...currentUser, displayName: currentUser.externalId }
+
+  function handleSelectServer(serverId: number) {
+    setActiveServerId(serverId)
+    setActiveChannelId(null)
+  }
+
+  function handleSelectChannel(channelId: number) {
     setActiveChannelId(channelId)
     setIsChannelDrawerOpen(false)
   }
 
-  function handleSendMessage(text: string) {
-    const newMessage: Message = {
-      id: crypto.randomUUID(),
-      channelId: activeChannel.id,
-      author: CURRENT_USER,
-      content: text,
-      createdAt: new Date().toISOString(),
-    }
+  function handleServerReady(server: Server) {
+    refreshServers()
+    setActiveServerId(server.id)
+  }
 
-    setMessagesByChannel((previous) => ({
-      ...previous,
-      [activeChannel.id]: [...(previous[activeChannel.id] ?? []), newMessage],
-    }))
+  function handleChannelCreated(channel: Channel) {
+    refreshChannels()
+    setActiveChannelId(channel.id)
+  }
+
+  function handleChannelDeleted(channelId: number) {
+    refreshChannels()
+    if (activeChannelId === channelId) setActiveChannelId(null)
+  }
+
+  let mainContent: ReactNode
+
+  if (isServersLoading) {
+    mainContent = <CenteredNotice>서버 목록을 불러오는 중...</CenteredNotice>
+  } else if (servers.length === 0) {
+    mainContent = (
+      <div className="flex flex-1 items-center justify-center px-4">
+        <div className="w-full max-w-sm">
+          <p className="mb-6 text-center text-sm text-slate-500 dark:text-slate-400">아직 속한 서버가 없습니다.</p>
+          <CreateOrJoinServerPanel onServerCreated={handleServerReady} onServerJoined={refreshServers} />
+        </div>
+      </div>
+    )
+  } else if (!activeServer) {
+    mainContent = <CenteredNotice>불러오는 중...</CenteredNotice>
+  } else if (isChannelsLoading) {
+    mainContent = <CenteredNotice>채널을 불러오는 중...</CenteredNotice>
+  } else if (channels.length === 0) {
+    mainContent = (
+      <div className="flex flex-1 items-center justify-center px-4">
+        <div className="w-full max-w-sm">
+          <p className="mb-6 text-center text-sm text-slate-500 dark:text-slate-400">
+            {activeServer.name}에 아직 채널이 없습니다.
+          </p>
+          <CreateChannelForm serverId={activeServer.id} onChannelCreated={handleChannelCreated} />
+        </div>
+      </div>
+    )
+  } else if (!activeChannel) {
+    mainContent = <CenteredNotice>불러오는 중...</CenteredNotice>
+  } else {
+    mainContent = (
+      <>
+        <MessageList messages={messages} />
+        <MessageInput channelName={activeChannel.name} onSubmit={sendMessage} />
+      </>
+    )
   }
 
   return (
     <div className="flex h-screen w-full flex-col bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-100">
       <AppHeader
-        servers={MOCK_SERVERS}
+        servers={servers}
         activeServer={activeServer}
         activeChannel={activeChannel}
-        currentUser={CURRENT_USER}
+        currentUser={displayCurrentUser}
         isMemberListOpen={isMemberListOpen}
         onSelectServer={handleSelectServer}
+        onServerCreated={handleServerReady}
+        onServerJoined={refreshServers}
+        onServerUpdated={refreshServers}
         onToggleMemberList={() => setIsMemberListOpen((open) => !open)}
         onToggleChannelDrawer={() => setIsChannelDrawerOpen((open) => !open)}
       />
 
       <div className="flex min-h-0 flex-1">
-        <ChannelSidebar
-          channels={channels}
-          activeChannelId={activeChannel.id}
-          isOpen={isChannelDrawerOpen}
-          onSelectChannel={handleSelectChannel}
-          onClose={() => setIsChannelDrawerOpen(false)}
-        />
+        {activeServer && (
+          <ChannelSidebar
+            serverId={activeServer.id}
+            channels={channels}
+            activeChannelId={activeChannel?.id ?? null}
+            isOpen={isChannelDrawerOpen}
+            onSelectChannel={handleSelectChannel}
+            onChannelCreated={handleChannelCreated}
+            onChannelDeleted={handleChannelDeleted}
+            onClose={() => setIsChannelDrawerOpen(false)}
+          />
+        )}
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          <MessageList messages={messages} />
-          <MessageInput channelName={activeChannel.name} onSubmit={handleSendMessage} />
-        </div>
+        <div className="flex min-w-0 flex-1 flex-col">{mainContent}</div>
 
-        {isMemberListOpen && <MemberList members={MOCK_USERS} />}
+        {isMemberListOpen && activeServer && <MemberList members={members} />}
       </div>
     </div>
   )

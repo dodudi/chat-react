@@ -16,7 +16,7 @@ export function MessageBubble({ message, showHeader }: MessageBubbleProps) {
       <div className="min-w-0 flex-1">
         {showHeader && (
           <div className="flex items-baseline gap-2">
-            <span className="font-medium text-slate-800 dark:text-slate-100">{message.author.username}</span>
+            <span className="font-medium text-slate-800 dark:text-slate-100">{message.author.displayName}</span>
             <span className="text-xs text-slate-400 dark:text-slate-500">{formatTime(message.createdAt)}</span>
           </div>
         )}

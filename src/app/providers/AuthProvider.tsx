@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, type ReactNode } from 'react'
 import type { TokenResponse } from '../../features/auth/types'
-import { redirectToAuthorize } from '../../features/auth/api/authApi'
-import { clearTokens, getAccessToken, setTokens } from '../../shared/api/tokenStorage'
+import { redirectToAuthorize, redirectToEndSession } from '../../features/auth/api/authApi'
+import { clearTokens, getAccessToken, getIdToken, setTokens } from '../../shared/api/tokenStorage'
 
 type AuthContextValue = {
   isAuthenticated: boolean
@@ -16,13 +16,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(() => getAccessToken() !== null)
 
   function completeLogin(tokens: TokenResponse) {
-    setTokens(tokens.access_token, tokens.refresh_token)
+    setTokens(tokens.access_token, tokens.refresh_token, tokens.id_token)
     setIsAuthenticated(true)
   }
 
   function logout() {
+    const idToken = getIdToken()
     clearTokens()
     setIsAuthenticated(false)
+    redirectToEndSession(idToken)
   }
 
   const value: AuthContextValue = {

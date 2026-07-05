@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import type { User } from '../../user/types'
+import type { DisplayUser } from '../../user/types'
 import { useAuth } from '../../../app/providers/AuthProvider'
 import { Avatar } from '../../../shared/components/Avatar'
 import { ChevronDownIcon } from '../../../shared/components/icons/ChevronDownIcon'
 
 type UserMenuProps = {
-  user: User
+  user: DisplayUser
 }
 
 export function UserMenu({ user }: UserMenuProps) {
@@ -22,7 +22,7 @@ export function UserMenu({ user }: UserMenuProps) {
       >
         <Avatar user={user} size="sm" />
         <span className="hidden text-sm font-medium text-slate-700 md:inline dark:text-slate-200">
-          {user.username}
+          {user.displayName}
         </span>
         <ChevronDownIcon className="hidden h-4 w-4 text-slate-400 md:inline dark:text-slate-500" />
       </button>

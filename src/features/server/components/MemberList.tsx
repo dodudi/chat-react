@@ -1,34 +1,16 @@
-import type { User } from '../../user/types'
+import type { ServerMember } from '../types'
+import type { DisplayUser } from '../../user/types'
 import { Avatar } from '../../../shared/components/Avatar'
 
 type MemberListProps = {
-  members: User[]
+  members: ServerMember[]
 }
 
 export function MemberList({ members }: MemberListProps) {
-  const onlineMembers = members.filter((member) => member.status !== 'OFFLINE')
-  const offlineMembers = members.filter((member) => member.status === 'OFFLINE')
-
   return (
     <div className="hidden w-56 shrink-0 overflow-y-auto border-l border-slate-200 bg-slate-50 px-2 py-4 sm:block dark:border-slate-700 dark:bg-slate-800/50">
-      <MemberGroup label={`온라인 — ${onlineMembers.length}`} members={onlineMembers} />
-      <MemberGroup label={`오프라인 — ${offlineMembers.length}`} members={offlineMembers} />
-    </div>
-  )
-}
-
-type MemberGroupProps = {
-  label: string
-  members: User[]
-}
-
-function MemberGroup({ label, members }: MemberGroupProps) {
-  if (members.length === 0) return null
-
-  return (
-    <div className="mb-4">
       <p className="px-2 pb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase dark:text-slate-500">
-        {label}
+        멤버 — {members.length}
       </p>
       <ul className="flex flex-col gap-0.5">
         {members.map((member) => (
@@ -37,9 +19,9 @@ function MemberGroup({ label, members }: MemberGroupProps) {
               type="button"
               className="flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left hover:bg-slate-200/60 dark:hover:bg-slate-700/50"
             >
-              <Avatar user={member} size="sm" />
+              <Avatar user={toDisplayUser(member)} size="sm" showStatus={false} />
               <span className="truncate text-sm font-medium text-slate-600 dark:text-slate-300">
-                {member.username}
+                {member.nickname ?? member.externalId}
               </span>
             </button>
           </li>
@@ -47,4 +29,15 @@ function MemberGroup({ label, members }: MemberGroupProps) {
       </ul>
     </div>
   )
+}
+
+// 서버 멤버 API에는 presence(온라인 상태)가 없어 Avatar에는 상태 점을 숨기고(showStatus=false) 임시 OFFLINE으로 채움
+function toDisplayUser(member: ServerMember): DisplayUser {
+  return {
+    id: member.userId,
+    externalId: member.externalId,
+    status: 'OFFLINE',
+    createdAt: member.joinedAt,
+    displayName: member.nickname ?? member.externalId,
+  }
 }

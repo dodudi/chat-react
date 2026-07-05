@@ -7,6 +7,7 @@ interface ImportMetaEnv {
   readonly VITE_AUTH_REDIRECT_URI: string
   readonly VITE_AUTH_POST_LOGOUT_REDIRECT_URI: string
   readonly VITE_AUTH_SCOPE: string
+  readonly VITE_WS_BASE_URL: string
 }
 
 interface ImportMeta {
