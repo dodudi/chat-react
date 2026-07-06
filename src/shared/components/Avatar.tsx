@@ -13,7 +13,7 @@ const SIZE_CLASSES = {
   lg: 'h-20 w-20 text-2xl',
 } as const
 
-const STATUS_DOT_CLASSES: Record<UserStatus, string> = {
+export const STATUS_DOT_CLASSES: Record<UserStatus, string> = {
   ONLINE: 'bg-emerald-500',
   IDLE: 'bg-amber-400',
   DND: 'bg-red-500',

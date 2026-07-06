@@ -5,6 +5,7 @@ import type { Channel } from '../../channel/types'
 import { useCurrentUser } from '../../../app/providers/CurrentUserProvider'
 import { useMyServers } from '../../server/hooks/useMyServers'
 import { useChannels } from '../../channel/hooks/useChannels'
+import { useCategories } from '../../channel/hooks/useCategories'
 import { useServerMembers } from '../../server/hooks/useServerMembers'
 import { useMessages } from '../hooks/useMessages'
 import { ChannelSidebar } from '../../channel/components/ChannelSidebar'
@@ -38,6 +39,7 @@ export function ChatLayout() {
   }, [servers, activeServerId])
 
   const { channels, isLoading: isChannelsLoading, refresh: refreshChannels } = useChannels(activeServerId ?? -1)
+  const { categories, refresh: refreshCategories } = useCategories(activeServerId ?? -1)
   const { members } = useServerMembers(activeServerId ?? -1)
   const { messages, send: sendMessage } = useMessages(activeChannelId ?? -1, members)
 
@@ -110,7 +112,7 @@ export function ChatLayout() {
           <p className="mb-6 text-center text-sm text-slate-500 dark:text-slate-400">
             {activeServer.name}에 아직 채널이 없습니다.
           </p>
-          <CreateChannelForm serverId={activeServer.id} onChannelCreated={handleChannelCreated} />
+          <CreateChannelForm serverId={activeServer.id} categories={categories} onChannelCreated={handleChannelCreated} />
         </div>
       </div>
     )
@@ -146,11 +148,18 @@ export function ChatLayout() {
           <ChannelSidebar
             serverId={activeServer.id}
             channels={channels}
+            categories={categories}
             activeChannelId={activeChannel?.id ?? null}
             isOpen={isChannelDrawerOpen}
             onSelectChannel={handleSelectChannel}
             onChannelCreated={handleChannelCreated}
             onChannelDeleted={handleChannelDeleted}
+            onCategoryCreated={() => refreshCategories()}
+            onCategoryUpdated={() => refreshCategories()}
+            onCategoryDeleted={() => {
+              refreshCategories()
+              refreshChannels()
+            }}
             onClose={() => setIsChannelDrawerOpen(false)}
           />
         )}

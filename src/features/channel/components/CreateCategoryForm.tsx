@@ -1,22 +1,15 @@
 import { useState, type FormEvent } from 'react'
-import type { Category, Channel } from '../types'
-import { createChannel } from '../api/channelApi'
+import type { Category } from '../types'
+import { createCategory } from '../api/channelApi'
 
-type CreateChannelFormProps = {
+type CreateCategoryFormProps = {
   serverId: number
-  categories: Category[]
-  initialCategoryId?: number | null
-  onChannelCreated: (channel: Channel) => void
+  nextPosition: number
+  onCategoryCreated: (category: Category) => void
 }
 
-export function CreateChannelForm({
-  serverId,
-  categories,
-  initialCategoryId = null,
-  onChannelCreated,
-}: CreateChannelFormProps) {
+export function CreateCategoryForm({ serverId, nextPosition, onCategoryCreated }: CreateCategoryFormProps) {
   const [name, setName] = useState('')
-  const [categoryId, setCategoryId] = useState(initialCategoryId)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -29,11 +22,11 @@ export function CreateChannelForm({
     setError(null)
 
     try {
-      const channel = await createChannel(serverId, { name: trimmed, type: 'TEXT', position: 0, categoryId })
+      const category = await createCategory(serverId, { name: trimmed, position: nextPosition })
       setName('')
-      onChannelCreated(channel)
+      onCategoryCreated(category)
     } catch {
-      setError('채널 생성에 실패했습니다.')
+      setError('카테고리 생성에 실패했습니다.')
     } finally {
       setIsSubmitting(false)
     }
@@ -44,24 +37,10 @@ export function CreateChannelForm({
       <input
         value={name}
         onChange={(event) => setName(event.target.value)}
-        placeholder="채널 이름"
+        placeholder="카테고리 이름"
         autoFocus
         className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-400 focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-teal-500"
       />
-      {categories.length > 0 && (
-        <select
-          value={categoryId ?? ''}
-          onChange={(event) => setCategoryId(event.target.value ? Number(event.target.value) : null)}
-          className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 outline-none focus:border-teal-400 focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-teal-500"
-        >
-          <option value="">카테고리 없음</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
-      )}
       <button
         type="submit"
         disabled={name.trim().length === 0 || isSubmitting}

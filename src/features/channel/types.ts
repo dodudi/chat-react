@@ -20,3 +20,21 @@ export type CreateChannelRequest = {
   categoryId?: number | null
   position: number
 }
+
+export type Category = {
+  id: number
+  serverId: number
+  name: string
+  position: number
+  createdAt: string
+}
+
+export type CreateCategoryRequest = {
+  name: string
+  position: number
+}
+
+export type UpdateCategoryRequest = {
+  name: string
+  position: number
+}
