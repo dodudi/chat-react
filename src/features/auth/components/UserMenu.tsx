@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import clsx from 'clsx'
 import type { DisplayUser, UserStatus } from '../../user/types'
 import { useAuth } from '../../../app/providers/AuthProvider'
@@ -21,12 +21,27 @@ const STATUS_LABELS: Record<UserStatus, string> = {
 
 export function UserMenu({ user }: UserMenuProps) {
   const { logout } = useAuth()
-  const { updateStatus } = useCurrentUser()
+  const { updateStatus, updateNickname } = useCurrentUser()
   const [isOpen, setIsOpen] = useState(false)
+  const [nickname, setNickname] = useState(user.nickname)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   function handleSelectStatus(status: UserStatus) {
     setIsOpen(false)
     updateStatus(status)
+  }
+
+  async function handleSubmitNickname(event: FormEvent) {
+    event.preventDefault()
+    const trimmed = nickname.trim()
+    if (!trimmed || trimmed === user.nickname) return
+
+    setIsSubmitting(true)
+    try {
+      await updateNickname(trimmed)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -52,7 +67,28 @@ export function UserMenu({ user }: UserMenuProps) {
             onClick={() => setIsOpen(false)}
             className="fixed inset-0 z-10 cursor-default"
           />
-          <div className="absolute top-full right-0 z-20 mt-1 w-44 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800">
+          <div className="absolute top-full right-0 z-20 mt-1 w-56 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800">
+            <form onSubmit={handleSubmitNickname} className="px-3 pt-1 pb-2">
+              <p className="pb-1.5 text-xs font-semibold tracking-wide text-slate-400 uppercase dark:text-slate-500">
+                닉네임
+              </p>
+              <div className="flex gap-1.5">
+                <input
+                  value={nickname}
+                  onChange={(event) => setNickname(event.target.value)}
+                  maxLength={30}
+                  className="w-full min-w-0 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-sm text-slate-800 outline-none focus:border-teal-400 focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-teal-500"
+                />
+                <button
+                  type="submit"
+                  disabled={nickname.trim().length === 0 || nickname.trim() === user.nickname || isSubmitting}
+                  className="shrink-0 rounded-md bg-teal-600 px-2 py-1 text-xs font-medium text-white hover:bg-teal-700 disabled:bg-slate-300 dark:disabled:bg-slate-700"
+                >
+                  저장
+                </button>
+              </div>
+            </form>
+            <div className="my-1 border-t border-slate-200 dark:border-slate-700" />
             <p className="px-3 pt-1 pb-1.5 text-xs font-semibold tracking-wide text-slate-400 uppercase dark:text-slate-500">
               상태 설정
             </p>

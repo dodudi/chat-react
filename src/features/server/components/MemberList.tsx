@@ -33,11 +33,13 @@ export function MemberList({ members }: MemberListProps) {
 
 // 서버 멤버 API에는 presence(온라인 상태)가 없어 Avatar에는 상태 점을 숨기고(showStatus=false) 임시 OFFLINE으로 채움
 function toDisplayUser(member: ServerMember): DisplayUser {
+  const displayName = member.nickname ?? member.externalId
   return {
     id: member.userId,
     externalId: member.externalId,
+    nickname: displayName,
     status: 'OFFLINE',
     createdAt: member.joinedAt,
-    displayName: member.nickname ?? member.externalId,
+    displayName,
   }
 }

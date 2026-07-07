@@ -9,12 +9,14 @@ const MESSAGE_PAGE_LIMIT = 50
 
 function toDisplayAuthor(response: MessageResponse, members: ServerMember[]): DisplayUser {
   const member = members.find((candidate) => candidate.userId === response.senderId)
+  const displayName = member?.nickname ?? response.senderExternalId
   return {
     id: response.senderId,
     externalId: response.senderExternalId,
+    nickname: displayName,
     status: 'OFFLINE',
     createdAt: response.createdAt,
-    displayName: member?.nickname ?? response.senderExternalId,
+    displayName,
   }
 }
 

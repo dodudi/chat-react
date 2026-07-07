@@ -1,12 +1,13 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import type { User, UserStatus } from '../../features/user/types'
-import { fetchMe, updateMyStatus } from '../../features/user/api/userApi'
+import { fetchMe, updateMyNickname, updateMyStatus } from '../../features/user/api/userApi'
 import { useAuth } from './AuthProvider'
 
 type CurrentUserContextValue = {
   currentUser: User | null
   isLoading: boolean
   updateStatus: (status: UserStatus) => Promise<void>
+  updateNickname: (nickname: string) => Promise<void>
 }
 
 const CurrentUserContext = createContext<CurrentUserContextValue | null>(null)
@@ -44,8 +45,13 @@ export function CurrentUserProvider({ children }: { children: ReactNode }) {
     setCurrentUser(updated)
   }
 
+  async function updateNickname(nickname: string) {
+    const updated = await updateMyNickname(nickname)
+    setCurrentUser(updated)
+  }
+
   return (
-    <CurrentUserContext.Provider value={{ currentUser, isLoading, updateStatus }}>
+    <CurrentUserContext.Provider value={{ currentUser, isLoading, updateStatus, updateNickname }}>
       {children}
     </CurrentUserContext.Provider>
   )

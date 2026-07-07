@@ -8,3 +8,7 @@ export async function fetchMe(): Promise<User> {
 export async function updateMyStatus(status: UserStatus): Promise<User> {
   return apiClient.patch('/api/v1/users/me/status', { status })
 }
+
+export async function updateMyNickname(nickname: string): Promise<User> {
+  return apiClient.patch('/api/v1/users/me/nickname', { nickname })
+}

@@ -60,8 +60,7 @@ export function ChatLayout() {
     )
   }
 
-  // 서버 멤버 닉네임 연동 전까지는 표시 이름으로 externalId를 임시로 사용
-  const displayCurrentUser: DisplayUser = { ...currentUser, displayName: currentUser.externalId }
+  const displayCurrentUser: DisplayUser = { ...currentUser, displayName: currentUser.nickname }
 
   function handleSelectServer(serverId: number) {
     setActiveServerId(serverId)
