@@ -1,9 +1,16 @@
-import type { Message } from '../types'
-import { Avatar } from '../../../shared/components/Avatar'
-import { formatTime } from '../../../shared/utils/formatTime'
+import type { DisplayUser } from '../../features/user/types'
+import { Avatar } from './Avatar'
+import { formatTime } from '../utils/formatTime'
+
+export type BubbleMessage = {
+  id: number
+  content: string
+  createdAt: string
+  author: DisplayUser
+}
 
 type MessageBubbleProps = {
-  message: Message
+  message: BubbleMessage
   showHeader: boolean
 }
 

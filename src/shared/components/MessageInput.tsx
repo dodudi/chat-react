@@ -1,12 +1,12 @@
 import { useState, type FormEvent } from 'react'
-import { SendIcon } from '../../../shared/components/icons/SendIcon'
+import { SendIcon } from './icons/SendIcon'
 
 type MessageInputProps = {
-  channelName: string
+  placeholder: string
   onSubmit: (text: string) => void
 }
 
-export function MessageInput({ channelName, onSubmit }: MessageInputProps) {
+export function MessageInput({ placeholder, onSubmit }: MessageInputProps) {
   const [text, setText] = useState('')
 
   function handleSubmit(event: FormEvent) {
@@ -24,7 +24,7 @@ export function MessageInput({ channelName, onSubmit }: MessageInputProps) {
         <input
           value={text}
           onChange={(event) => setText(event.target.value)}
-          placeholder={`#${channelName}에 메시지 보내기`}
+          placeholder={placeholder}
           className="flex-1 bg-transparent text-sm text-slate-800 placeholder-slate-400 outline-none dark:text-slate-100 dark:placeholder-slate-500"
         />
         <button

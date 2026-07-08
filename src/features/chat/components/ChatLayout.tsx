@@ -13,8 +13,8 @@ import { CreateChannelForm } from '../../channel/components/CreateChannelForm'
 import { MemberList } from '../../server/components/MemberList'
 import { CreateOrJoinServerPanel } from '../../server/components/CreateOrJoinServerPanel'
 import { AppHeader } from './AppHeader'
-import { MessageList } from './MessageList'
-import { MessageInput } from './MessageInput'
+import { MessageList } from '../../../shared/components/MessageList'
+import { MessageInput } from '../../../shared/components/MessageInput'
 
 function CenteredNotice({ children }: { children: ReactNode }) {
   return (
@@ -121,7 +121,7 @@ export function ChatLayout() {
     mainContent = (
       <>
         <MessageList messages={messages} />
-        <MessageInput channelName={activeChannel.name} onSubmit={sendMessage} />
+        <MessageInput placeholder={`#${activeChannel.name}에 메시지 보내기`} onSubmit={sendMessage} />
       </>
     )
   }
@@ -165,7 +165,7 @@ export function ChatLayout() {
 
         <div className="flex min-w-0 flex-1 flex-col">{mainContent}</div>
 
-        {isMemberListOpen && activeServer && <MemberList members={members} />}
+        {isMemberListOpen && activeServer && <MemberList members={members} currentUserId={currentUser.id} />}
       </div>
     </div>
   )

@@ -31,6 +31,9 @@ export function CurrentUserProvider({ children }: { children: ReactNode }) {
       .then((user) => {
         if (!isCancelled) setCurrentUser(user)
       })
+      .catch(() => {
+        if (!isCancelled) setCurrentUser(null)
+      })
       .finally(() => {
         if (!isCancelled) setIsLoading(false)
       })

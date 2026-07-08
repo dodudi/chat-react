@@ -9,6 +9,7 @@ import { useTheme } from '../../../shared/hooks/useTheme'
 import { HashIcon } from '../../../shared/components/icons/HashIcon'
 import { SearchIcon } from '../../../shared/components/icons/SearchIcon'
 import { CompassIcon } from '../../../shared/components/icons/CompassIcon'
+import { MailIcon } from '../../../shared/components/icons/MailIcon'
 import { UsersIcon } from '../../../shared/components/icons/UsersIcon'
 import { MenuIcon } from '../../../shared/components/icons/MenuIcon'
 import { SunIcon } from '../../../shared/components/icons/SunIcon'
@@ -79,6 +80,13 @@ export function AppHeader({
       )}
 
       <div className="ml-auto flex items-center gap-1">
+        <Link
+          to="/dm"
+          aria-label="다이렉트 메시지"
+          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+        >
+          <MailIcon className="h-5 w-5" />
+        </Link>
         <Link
           to="/discover"
           aria-label="공개 서버 둘러보기"

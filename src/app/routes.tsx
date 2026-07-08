@@ -4,6 +4,7 @@ import { LoginPage } from '../features/auth/components/LoginPage'
 import { CallbackPage } from '../features/auth/components/CallbackPage'
 import { ChatLayout } from '../features/chat/components/ChatLayout'
 import { DiscoverServersPage } from '../features/server/components/DiscoverServersPage'
+import { DmLayout } from '../features/dm/components/DmLayout'
 
 function RequireAuth() {
   const { isAuthenticated } = useAuth()
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
     element: <RequireAuth />,
     children: [
       { path: '/', element: <ChatLayout /> },
+      { path: '/dm', element: <DmLayout /> },
       { path: '/discover', element: <DiscoverServersPage /> },
     ],
   },

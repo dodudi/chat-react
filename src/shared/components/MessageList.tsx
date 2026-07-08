@@ -1,8 +1,7 @@
-import type { Message } from '../types'
-import { MessageBubble } from './MessageBubble'
+import { MessageBubble, type BubbleMessage } from './MessageBubble'
 
 type MessageListProps = {
-  messages: Message[]
+  messages: BubbleMessage[]
 }
 
 export function MessageList({ messages }: MessageListProps) {
